@@ -1,0 +1,105 @@
+C:\Users\yuta_\開発\Claude\movie-app\backend\main.py:29: DeprecationWarning: 
+        on_event is deprecated, use lifespan event handlers instead.
+
+        Read more about it in the
+        [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+        
+  @app.on_event("startup")
+INFO:     Started server process [59284]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+INFO:     127.0.0.1:49672 - "OPTIONS /api/search/sync HTTP/1.1" 200 OK
+[SYNC] 同期を開始します。インタラクティブモード: True
+[SYNC] スクレイパーを初期化中...
+[DEBUG] ChromeOptions を作成中...
+[DEBUG] Selenium Chrome ドライバを作成中...
+[DEBUG] Selenium ドライバを初期化しました
+[SYNC] スクレイパー初期化完了
+[SYNC] ログインを試行中...
+[DEBUG] ログインページを取得: https://eiga.com/login/
+[DEBUG] 対話型ログインモードを開始
+ブラウザが開きます。ログインしてください（Facebook連携でも可）
+ログイン完了後、このスクリプトが自動継続します。
+[DEBUG] 初期 URL: https://eiga.com/login/
+[DEBUG] 2秒経過 - URL 変化を検出: https://id.eiga.com/authorize/?cid=eigacom_login&client_id=eigacom&gid_mode=login&redirect_uri=https%3A%2F%2Feiga.com%2Flogin%2Foauth%2Fgid%2F&response_type=code&scope=email%20profile&state=5biFHOSg0SkhF14Cavkydr8wWsacShEtx7XTiI1V
+[DEBUG] OAuth認可画面と判定: https://id.eiga.com/authorize/?cid=eigacom_login&client_id=eigacom&gid_mode=login&redirect_uri=https%3A%2F%2Feiga.com%2Flogin%2Foauth%2Fgid%2F&response_type=code&scope=email%20profile&state=5biFHOSg0SkhF14Cavkydr8wWsacShEtx7XTiI1V
+[DEBUG] 4秒経過 - URL 変化を検出: https://id.eiga.com/authorize/?cid=eigacom_login&client_id=eigacom&gid_mode=login&redirect_uri=https%3A%2F%2Feiga.com%2Flogin%2Foauth%2Fgid%2F&response_type=code&scope=email%20profile&state=5biFHOSg0SkhF14Cavkydr8wWsacShEtx7XTiI1V
+[DEBUG] OAuth認可画面と判定: https://id.eiga.com/authorize/?cid=eigacom_login&client_id=eigacom&gid_mode=login&redirect_uri=https%3A%2F%2Feiga.com%2Flogin%2Foauth%2Fgid%2F&response_type=code&scope=email%20profile&state=5biFHOSg0SkhF14Cavkydr8wWsacShEtx7XTiI1V
+[DEBUG] 6秒経過 - URL 変化を検出: https://id.eiga.com/authorize/?cid=eigacom_login&client_id=eigacom&gid_mode=login&redirect_uri=https%3A%2F%2Feiga.com%2Flogin%2Foauth%2Fgid%2F&response_type=code&scope=email%20profile&state=5biFHOSg0SkhF14Cavkydr8wWsacShEtx7XTiI1V
+[DEBUG] OAuth認可画面と判定: https://id.eiga.com/authorize/?cid=eigacom_login&client_id=eigacom&gid_mode=login&redirect_uri=https%3A%2F%2Feiga.com%2Flogin%2Foauth%2Fgid%2F&response_type=code&scope=email%20profile&state=5biFHOSg0SkhF14Cavkydr8wWsacShEtx7XTiI1V
+[DEBUG] 8秒経過 - URL 変化を検出: https://id.eiga.com/authorize/?cid=eigacom_login&client_id=eigacom&gid_mode=login&redirect_uri=https%3A%2F%2Feiga.com%2Flogin%2Foauth%2Fgid%2F&response_type=code&scope=email%20profile&state=5biFHOSg0SkhF14Cavkydr8wWsacShEtx7XTiI1V
+[DEBUG] OAuth認可画面と判定: https://id.eiga.com/authorize/?cid=eigacom_login&client_id=eigacom&gid_mode=login&redirect_uri=https%3A%2F%2Feiga.com%2Flogin%2Foauth%2Fgid%2F&response_type=code&scope=email%20profile&state=5biFHOSg0SkhF14Cavkydr8wWsacShEtx7XTiI1V
+[DEBUG] 10秒経過 - URL 変化を検出: https://id.eiga.com/authorize/?cid=eigacom_login&client_id=eigacom&gid_mode=login&redirect_uri=https%3A%2F%2Feiga.com%2Flogin%2Foauth%2Fgid%2F&response_type=code&scope=email%20profile&state=5biFHOSg0SkhF14Cavkydr8wWsacShEtx7XTiI1V
+[DEBUG] OAuth認可画面と判定: https://id.eiga.com/authorize/?cid=eigacom_login&client_id=eigacom&gid_mode=login&redirect_uri=https%3A%2F%2Feiga.com%2Flogin%2Foauth%2Fgid%2F&response_type=code&scope=email%20profile&state=5biFHOSg0SkhF14Cavkydr8wWsacShEtx7XTiI1V
+[DEBUG] 12秒経過 - URL 変化を検出: https://id.eiga.com/authorize/?cid=eigacom_login&client_id=eigacom&gid_mode=login&redirect_uri=https%3A%2F%2Feiga.com%2Flogin%2Foauth%2Fgid%2F&response_type=code&scope=email%20profile&state=5biFHOSg0SkhF14Cavkydr8wWsacShEtx7XTiI1V
+[DEBUG] OAuth認可画面と判定: https://id.eiga.com/authorize/?cid=eigacom_login&client_id=eigacom&gid_mode=login&redirect_uri=https%3A%2F%2Feiga.com%2Flogin%2Foauth%2Fgid%2F&response_type=code&scope=email%20profile&state=5biFHOSg0SkhF14Cavkydr8wWsacShEtx7XTiI1V
+[DEBUG] 14秒経過 - URL 変化を検出: https://id.eiga.com/authorize/?cid=eigacom_login&client_id=eigacom&gid_mode=login&redirect_uri=https%3A%2F%2Feiga.com%2Flogin%2Foauth%2Fgid%2F&response_type=code&scope=email%20profile&state=5biFHOSg0SkhF14Cavkydr8wWsacShEtx7XTiI1V
+[DEBUG] OAuth認可画面と判定: https://id.eiga.com/authorize/?cid=eigacom_login&client_id=eigacom&gid_mode=login&redirect_uri=https%3A%2F%2Feiga.com%2Flogin%2Foauth%2Fgid%2F&response_type=code&scope=email%20profile&state=5biFHOSg0SkhF14Cavkydr8wWsacShEtx7XTiI1V
+[DEBUG] 16秒経過 - URL 変化を検出: https://id.eiga.com/authorize/?cid=eigacom_login&client_id=eigacom&gid_mode=login&redirect_uri=https%3A%2F%2Feiga.com%2Flogin%2Foauth%2Fgid%2F&response_type=code&scope=email%20profile&state=5biFHOSg0SkhF14Cavkydr8wWsacShEtx7XTiI1V
+[DEBUG] OAuth認可画面と判定: https://id.eiga.com/authorize/?cid=eigacom_login&client_id=eigacom&gid_mode=login&redirect_uri=https%3A%2F%2Feiga.com%2Flogin%2Foauth%2Fgid%2F&response_type=code&scope=email%20profile&state=5biFHOSg0SkhF14Cavkydr8wWsacShEtx7XTiI1V
+[DEBUG] 18秒経過 - URL 変化を検出: https://id.eiga.com/authorize/?cid=eigacom_login&client_id=eigacom&gid_mode=login&redirect_uri=https%3A%2F%2Feiga.com%2Flogin%2Foauth%2Fgid%2F&response_type=code&scope=email%20profile&state=5biFHOSg0SkhF14Cavkydr8wWsacShEtx7XTiI1V
+[DEBUG] OAuth認可画面と判定: https://id.eiga.com/authorize/?cid=eigacom_login&client_id=eigacom&gid_mode=login&redirect_uri=https%3A%2F%2Feiga.com%2Flogin%2Foauth%2Fgid%2F&response_type=code&scope=email%20profile&state=5biFHOSg0SkhF14Cavkydr8wWsacShEtx7XTiI1V
+[DEBUG] 20秒経過 - URL 変化を検出: https://id.eiga.com/authorize/?cid=eigacom_login&client_id=eigacom&gid_mode=login&redirect_uri=https%3A%2F%2Feiga.com%2Flogin%2Foauth%2Fgid%2F&response_type=code&scope=email%20profile&state=5biFHOSg0SkhF14Cavkydr8wWsacShEtx7XTiI1V
+[DEBUG] OAuth認可画面と判定: https://id.eiga.com/authorize/?cid=eigacom_login&client_id=eigacom&gid_mode=login&redirect_uri=https%3A%2F%2Feiga.com%2Flogin%2Foauth%2Fgid%2F&response_type=code&scope=email%20profile&state=5biFHOSg0SkhF14Cavkydr8wWsacShEtx7XTiI1V
+[DEBUG] 22秒経過 - URL 変化を検出: https://id.eiga.com/authorize/done/
+[DEBUG] OAuth認可画面と判定: https://id.eiga.com/authorize/done/
+[DEBUG] 24秒経過 - URL 変化を検出: https://id.eiga.com/authorize/done/
+[DEBUG] OAuth認可画面と判定: https://id.eiga.com/authorize/done/
+[DEBUG] 26秒経過 - URL 変化を検出: https://id.eiga.com/authorize/done/
+[DEBUG] OAuth認可画面と判定: https://id.eiga.com/authorize/done/
+[DEBUG] 28秒経過 - URL 変化を検出: https://id.eiga.com/authorize/done/
+[DEBUG] OAuth認可画面と判定: https://id.eiga.com/authorize/done/
+[DEBUG] 30秒経過 - URL 変化を検出: https://id.eiga.com/authorize/done/
+[DEBUG] OAuth認可画面と判定: https://id.eiga.com/authorize/done/
+[DEBUG] 32秒経過 - URL 変化を検出: https://id.eiga.com/authorize/done/
+[DEBUG] OAuth認可画面と判定: https://id.eiga.com/authorize/done/
+[DEBUG] 34秒経過 - URL 変化を検出: https://id.eiga.com/authorize/done/
+[DEBUG] OAuth認可画面と判定: https://id.eiga.com/authorize/done/
+[DEBUG] 36秒経過 - URL 変化を検出: https://id.eiga.com/authorize/done/
+[DEBUG] OAuth認可画面と判定: https://id.eiga.com/authorize/done/
+[DEBUG] 38秒経過 - URL 変化を検出: https://id.eiga.com/authorize/done/
+[DEBUG] OAuth認可画面と判定: https://id.eiga.com/authorize/done/
+[DEBUG] 40秒経過 - URL 変化を検出: https://id.eiga.com/authorize/done/
+[DEBUG] OAuth認可画面と判定: https://id.eiga.com/authorize/done/
+[DEBUG] 42秒経過 - URL 変化を検出: https://id.eiga.com/authorize/done/
+[DEBUG] OAuth認可画面と判定: https://id.eiga.com/authorize/done/
+[DEBUG] 44秒経過 - URL 変化を検出: https://id.eiga.com/authorize/done/
+[DEBUG] OAuth認可画面と判定: https://id.eiga.com/authorize/done/
+[DEBUG] 46秒経過 - URL 変化を検出: https://id.eiga.com/authorize/done/
+[DEBUG] OAuth認可画面と判定: https://id.eiga.com/authorize/done/
+[DEBUG] 48秒経過 - URL 変化を検出: https://id.eiga.com/authorize/done/
+[DEBUG] OAuth認可画面と判定: https://id.eiga.com/authorize/done/
+[DEBUG] 50秒経過 - URL 変化を検出: https://id.eiga.com/authorize/done/
+[DEBUG] OAuth認可画面と判定: https://id.eiga.com/authorize/done/
+[DEBUG] 52秒経過 - URL 変化を検出: https://id.eiga.com/authorize/done/
+[DEBUG] OAuth認可画面と判定: https://id.eiga.com/authorize/done/
+[DEBUG] 54秒経過 - URL 変化を検出: https://id.eiga.com/authorize/done/
+[DEBUG] OAuth認可画面と判定: https://id.eiga.com/authorize/done/
+[DEBUG] 56秒経過 - URL 変化を検出: https://id.eiga.com/authorize/done/
+[DEBUG] OAuth認可画面と判定: https://id.eiga.com/authorize/done/
+[DEBUG] 58秒経過 - URL 変化を検出: https://id.eiga.com/authorize/done/
+[DEBUG] OAuth認可画面と判定: https://id.eiga.com/authorize/done/
+[DEBUG] 60秒経過 - URL 変化を検出: https://id.eiga.com/authorize/done/
+[DEBUG] OAuth認可画面と判定: https://id.eiga.com/authorize/done/
+[DEBUG] 62秒経過 - URL 変化を検出: https://eiga.com/user/267148/
+[DEBUG] ページ上にログアウトまたはマイページ表記を検出
+[DEBUG] ページ上にログアウトまたはマイページ表記を検出
+[DEBUG] ログイン完了を検知（安定確認済）: https://eiga.com/user/267148/
+[DEBUG] ユーザーID を抽出しました: 267148
+[SYNC] ログイン成功。映画データを取得中...
+[DEBUG] 視聴済みページを取得: https://eiga.com/user/watched/
+[DEBUG] 視聴済みページを取得: https://eiga.com/user/267148/movie/
+[DEBUG] 現在の URL: https://eiga.com/user/267148/movie/
+[DEBUG] ページ内容（最初500文字）:           ししもさんのMyページ（Check-in作品） - 映画.com                                             作品 映画館 ニュース              ログイン 新規登録               登録したプラットフォームで「3月のライオン　後編」が配信中です！ 2ヶ月前          登録したプラットフォームで「岸辺露伴　ルーヴルへ行く」が配信中です！ 5ヶ月前          登録したプラットフォームで「岸辺露伴は動かない　懺悔室」が配信中です！ 5ヶ月前          第96回アカデミー賞ノミネートが発表！　いますぐ全リストをチェック！ 2年前          「シン・仮面ライダー」Prime Videoで独占配信開始！　あの話題作が早くも観られる！ 2年前     すべて見る           Myページ ログアウト            ホーム > Myページ > ししも > Check-in作品       ししも    プロフィール   INFO   設定   ログアウト     0 
+[DEBUG] パターン1: c-watched-item = 0 件
+[DEBUG] パターン2: c-list__item = 0 件
+[DEBUG] パターン3: /movie/ リンク = 43 件
+[DEBUG] 43 件の映画要素を検出
+[DEBUG] 合計 0 件の映画を取得
+[SYNC] 0 件の映画を取得しました
+[DEBUG] ドライバを閉じました
+[DEBUG] ドライバを閉じました
+INFO:     127.0.0.1:49672 - "POST /api/search/sync HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49672 - "GET /api/records/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61140 - "GET /api/movies/ HTTP/1.1" 200 OK
