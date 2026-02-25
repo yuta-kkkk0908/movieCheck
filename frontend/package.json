@@ -19,6 +19,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "test": "react-scripts test",
     "build": "react-scripts build",
     "electron": "electron public/electron.js",
     "dev": "concurrently \"npm start\" \"wait-on http://localhost:3000 && npm run electron\""
