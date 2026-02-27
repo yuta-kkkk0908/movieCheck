@@ -8,6 +8,7 @@ from app.models.models import Movie
 from agent.tasks.movie_agent import MovieAgent
 from pydantic import BaseModel
 from typing import List, Optional
+from datetime import datetime
 
 router = APIRouter()
 
@@ -16,22 +17,27 @@ class SearchQuery(BaseModel):
 
 class SearchResult(BaseModel):
     title: str
-    released_year: Optional[int]
-    genre: Optional[str]
-    image_url: Optional[str]
+    release_date: Optional[datetime] = None
+    released_year: Optional[int] = None
+    genre: Optional[str] = None
+    image_url: Optional[str] = None
     movie_url: Optional[str] = None
     external_id: Optional[str] = None
 
 class SyncRequest(BaseModel):
     email: Optional[str] = None  # オプション：対話型ログイン時はNone
     password: Optional[str] = None  # オプション：対話型ログイン時はNone
+    save_credentials: bool = False
+    use_saved_credentials: bool = True
 
 class SyncResponse(BaseModel):
     success: bool
+    cancelled: bool = False
     message: str
     added: int
     existing: int
     errors: int
+    can_fallback_to_interactive: bool = False
 
 @router.post("/movies", response_model=List[SearchResult])
 async def search_movies(search: SearchQuery, db: Session = Depends(get_db)):
@@ -90,7 +96,12 @@ async def sync_eiga_com(request: SyncRequest, background_tasks: BackgroundTasks)
         同期結果
     """
     try:
-        result = MovieAgent.sync_from_eiga_com(request.email, request.password)
+        result = MovieAgent.sync_from_eiga_com_with_options(
+            email=request.email,
+            password=request.password,
+            save_credentials=request.save_credentials,
+            use_saved_credentials=request.use_saved_credentials
+        )
         return SyncResponse(**result)
     except Exception as e:
         print(f"同期エラー: {e}")
@@ -98,8 +109,10 @@ async def sync_eiga_com(request: SyncRequest, background_tasks: BackgroundTasks)
         traceback.print_exc()
         return SyncResponse(
             success=False,
+            cancelled=False,
             message=f"同期中にエラーが発生しました: {str(e)}",
             added=0,
             existing=0,
-            errors=1
+            errors=1,
+            can_fallback_to_interactive=False
         )

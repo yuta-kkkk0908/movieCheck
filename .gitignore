@@ -32,3 +32,14 @@ yarn-error.log*
 # env files (can opt-in for commiting if needed)
 .env*
 /frontend/node_modules
+
+# python
+__pycache__/
+*.py[cod]
+
+# local runtime artifacts
+backend/.venv/
+frontend/build/
+backend/instance/*.db
+backend/debug.log
+backend/app/db/.crypto_key

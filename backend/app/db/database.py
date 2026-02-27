@@ -2,7 +2,7 @@
 データベース設定
 """
 import os
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy.pool import StaticPool
 
@@ -34,3 +34,19 @@ def get_db():
 def create_tables():
     """テーブル作成"""
     Base.metadata.create_all(bind=engine)
+    _apply_lightweight_migrations()
+
+
+def _apply_lightweight_migrations():
+    """
+    既存SQLiteに対する軽量マイグレーション。
+    Alembic未導入環境向けに、必要最小限のカラム追加を行う。
+    """
+    inspector = inspect(engine)
+    if "movies" not in inspector.get_table_names():
+        return
+
+    movie_columns = {col["name"] for col in inspector.get_columns("movies")}
+    with engine.begin() as conn:
+        if "release_date" not in movie_columns:
+            conn.execute(text("ALTER TABLE movies ADD COLUMN release_date DATETIME"))

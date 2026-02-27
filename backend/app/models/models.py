@@ -14,6 +14,7 @@ class Movie(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(255), nullable=False, index=True)
     genre = Column(String(255))
+    release_date = Column(DateTime)
     released_year = Column(Integer)
     director = Column(String(255))
     cast = Column(Text)  # JSON形式で複数キャスト格納

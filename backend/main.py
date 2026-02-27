@@ -31,11 +31,12 @@ def create_app():
         create_tables()
     
     # ルート登録
-    from app.api import movies, records, search, statistics
+    from app.api import movies, records, search, statistics, credentials
     app.include_router(movies.router, prefix="/api/movies", tags=["movies"])
     app.include_router(records.router, prefix="/api/records", tags=["records"])
     app.include_router(search.router, prefix="/api/search", tags=["search"])
     app.include_router(statistics.router, prefix="/api/statistics", tags=["statistics"])
+    app.include_router(credentials.router, prefix="/api/credentials", tags=["credentials"])
     
     return app
 

@@ -2,6 +2,7 @@
 
 ## 運用ルール（仕様・履歴）
 
+- 仕様の正本は `SPEC.md` とする。
 - 仕様に関する変更は `SPEC.md` と本ファイルの両方を更新する。
 - 実装変更を伴う修正は `CHANGELOG.md` に履歴を追記する。
 - タスク指定は表記ゆれを許容して解釈する（例: `タスク1`, `タスク１`, `#1`, `Task 1`）。
@@ -27,15 +28,13 @@
   - 対話ログイン後、3パターン（通常/フォールバック/リンク探索）で到達確認できる。
   - 到達失敗時にログで原因が判別できる。
 
-### 2. `PARTIAL` Save credentials & auto-login
+### 2. `DONE` Save credentials & auto-login
 
 - 目的:
   - 認証情報保存と次回以降の自動ログインを可能にする。
-- 現状:
-  - API 呼び出し時に `email/password` を渡すと DB 保存（暗号化）までは実装済み。
-- 未実装仕様:
+- 実装:
   - 同期モーダルに「保存して次回自動ログイン」チェックを追加。
-  - 保存済み認証情報の利用優先順を定義:
+  - 保存済み認証情報の利用優先順を実装:
     1) 明示入力
     2) 保存済み有効資格情報
     3) 対話ログイン
@@ -47,7 +46,7 @@
 - 失敗時挙動:
   - 復号失敗・認証失敗時は自動ログインを中断し、対話ログインへの切替可否を返す。
 
-### 3. `TODO` Show search next to sync button
+### 3. `DONE` Show search next to sync button
 
 - 目的:
   - ヘッダから即時検索できる導線を追加する。
@@ -58,14 +57,12 @@
   - ヘッダ検索から登録・記録作成まで完走できる。
   - 既存の「映画検索」タブ機能と競合しない。
 
-### 4. `PARTIAL` Allow editing/deleting records
+### 4. `DONE` Allow editing/deleting records
 
 - 目的:
   - 記録の編集・削除を UI/API 両面で提供する。
-- 現状:
-  - `DELETE /api/records/{id}` は実装済み（UI 未接続）。
-- 未実装仕様:
-  - `PATCH /api/records/{id}` 追加。
+- 実装:
+  - `PATCH /api/records/{id}` を追加。
   - 編集対象: `viewed_date`, `viewing_method`, `rating`, `mood`, `comment`。
   - 削除 UI（確認ダイアログ付き）を追加。
 - DoD:
@@ -76,12 +73,12 @@
   - `viewing_method`/`mood`: enum 制約
   - `viewed_date`: ISO 8601
 
-### 5. `TODO` Add fetch details button (year & cast)
+### 5. `DONE` Add fetch details button (year & cast)
 
 - 目的:
   - 既存映画の詳細情報を後追い取得できるようにする。
-- 実装仕様:
-  - 映画ごとに「作品情報取得」ボタン追加。
+- 実装:
+  - 記録一覧の映画ごとに「作品情報取得」「強制更新」ボタンを追加。
   - API `POST /api/movies/{id}/refresh-details`（新規）で `get_movie_details()` 呼び出し。
 - DoD:
   - 年・キャスト・監督・あらすじの更新結果が UI に反映される。
@@ -89,40 +86,45 @@
   - 空値は上書き許可。
   - 既存値がある場合の上書き可否をオプション化（強制更新フラグ）。
 
-### 6. `PARTIAL` Ensure scraper captures director
+### 6. `DONE` Ensure scraper captures director
 
 - 目的:
   - 同期時点で監督欠損を減らす。
-- 現状:
-  - 詳細ページからの監督取得は実装済み。
-- 未実装仕様:
+- 実装:
   - リスト要素 `<p class="sub">` から監督名抽出を追加。
   - 抽出結果が空の場合のみ詳細ページ補完。
 - DoD:
   - 監督欠損率が同期データで下がる（確認ログまたは件数比較）。
 
-### 7. `TODO` Test complete scrape workflow
+### 7. `DONE` Test complete scrape workflow
 
 - 目的:
   - フル同期の品質確認を手順化する。
 - 実装仕様:
   - 手動確認チェックリストを `docs/` に追加。
   - 主要シナリオ: 初回同期、再同期、重複、途中失敗、復帰。
+- 実装:
+  - `docs/SYNC_CHECKLIST.md` を追加。
+  - 同期の主要シナリオごとの手順・期待結果・判定基準を明文化。
 - DoD:
   - チェックリストに従い誰でも同じ検証ができる。
 
-### 8. `TODO` Consolidate statistics API design
+### 8. `DONE` Consolidate statistics API design
 
 - 目的:
   - 重複実装の統計 API を一本化して保守性を上げる。
 - 実装仕様:
   - `GET /api/statistics/overview` のレスポンス仕様を確定。
   - 互換エンドポイントの廃止時期と移行期間を決める。
+- 実装:
+  - 正規エンドポイントを `GET /api/statistics/overview` に統一。
+  - 互換エンドポイント `GET /api/statistics/statistics/overview` は同一レスポンスを返す非推奨経路として維持。
+  - 移行期間を 2026-05-31 までとし、2026-06-01 以降に削除予定。
 - DoD:
   - フロントで使用する全キーが統一 API で取得できる。
   - 旧経路削除後も画面が壊れない。
 
-### 9. `TODO` Credential lifecycle management
+### 9. `DONE` Credential lifecycle management
 
 - 目的:
   - 資格情報の運用安全性を担保する。
@@ -133,7 +135,7 @@
   - 保存・更新・削除の各操作が UI 経由で完了できる。
   - 削除後の再同期は対話ログインにフォールバックする。
 
-### 10. `TODO` Record update API and validation
+### 10. `DONE` Record update API and validation
 
 - 目的:
   - 記録更新 API の入力品質を保証する。
@@ -141,9 +143,10 @@
   - `PATCH /api/records/{id}` を正式化。
   - バリデーションエラー時は `422` で項目別メッセージ返却。
 - DoD:
-  - 正常系・異常系（型不正/範囲外/enum不正）のテストを追加。
+  - 正常系で更新後の再読み込み反映を確認できる。
+  - 異常系（型不正/範囲外/enum不正）で `422` と項目別メッセージを返す。
 
-### 11. `TODO` Movie detail refresh API
+### 11. `DONE` Movie detail refresh API
 
 - 目的:
   - 詳細再取得ロジックを API として独立させる。
@@ -153,7 +156,7 @@
 - DoD:
   - 既存データに対して再取得実行しても整合性が壊れない。
 
-### 12. `TODO` Cast data type normalization
+### 12. `DONE` Cast data type normalization
 
 - 目的:
   - `movies.cast` を JSON 配列として正規化する。
@@ -164,7 +167,7 @@
   - 旧データを移行後に読める。
   - 新規保存は統一形式で保存される。
 
-### 13. `TODO` Scrape workflow tests
+### 13. `DONE` Scrape workflow tests
 
 - 目的:
   - 同期処理の回帰を自動検知する。
@@ -174,7 +177,7 @@
 - DoD:
   - CI なしでもローカルで再現可能なテスト手順がある。
 
-### 14. `TODO` Cancel sync when login browser is closed
+### 14. `DONE` Cancel sync when login browser is closed
 
 - 目的:
   - ユーザーがログインブラウザを閉じた場合に同期を安全に中断する。
@@ -196,8 +199,5 @@
 
 ## 次の優先実装順
 
-1. タスク14（同期キャンセル）
-2. タスク4 + 10（記録編集API/UIと検証）
-3. タスク8（統計API統合）
-4. タスク2 + 9（資格情報ライフサイクル）
-5. タスク5 + 11 + 12（詳細再取得とデータ正規化）
+1. 未着手タスクなし（本一覧の 1-14 は `DONE`）
+2. 追加要件は本ファイル末尾へ追記して管理する

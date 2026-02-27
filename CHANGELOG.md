@@ -1,5 +1,112 @@
 # Changelog
 
+## 2026-02-27
+
+- `backend/app/models/models.py` の `movies` テーブルに `release_date`（DateTime）カラムを追加。
+- `backend/app/db/database.py` に軽量マイグレーション処理を追加し、既存SQLiteの `movies.release_date` 未作成時に `ALTER TABLE` で自動追加するよう対応。
+- `backend/app/api/movies.py` のレスポンスに `release_date` を追加し、`POST /api/movies/{id}/refresh-details` の更新対象にも `release_date` を追加。
+- `backend/app/api/search.py` の `SearchResult` に `release_date` を追加。
+- `agent/tasks/movie_agent.py` を更新し、映画登録/同期時に `release_date` を保存、既存映画でも `release_date`・`released_year`・`director` をアップサート更新するよう変更。
+- `backend/tests/test_sync_workflow.py` に、既存映画のメタ情報（公開日/公開年/監督）が同期で更新されることを検証するテストを追加。
+- `docs/API.md` に `release_date` を含む映画レスポンス例・登録例を追記。
+- `docs/OAUTH_LOGIN_PLAYBOOK.md` を追加し、OAuthログイン失敗の主要原因（導線誤選択・state不整合）と成功パターン、他サービスへ転用可能なチェックリストを記録。
+- `SPEC.md` に `docs/OAUTH_LOGIN_PLAYBOOK.md` への参照を追記。
+- `agent/scrapers/eiga_scraper.py` の監督名抽出を改善し、`監督：名前` 形式に加えて `名前 監督`（`p.sub` 形式）でも取得できるように修正。
+
+## 2026-02-26
+
+- タスク14を実装し、ログインブラウザのクローズ/セッション切断をスクレイパー側で検出して同期をキャンセル扱いに変更。
+- `agent/tasks/movie_agent.py` でキャンセル時のDB rollbackと `success=false, cancelled=true` の返却を追加。
+- `backend/app/api/search.py` の `SyncResponse` に `cancelled` フィールドを追加。
+- `frontend/src/App.js` で同期キャンセル時のメッセージ表示（warning）を追加。
+- `TASKS.md` に「仕様の正本は `SPEC.md`」を追記し、タスク14を `DONE` へ更新、優先実装順を更新。
+- `SPEC.md` の同期キャンセル仕様から「要実装」表記を削除し、返却仕様を明記。
+- `backend/app/api/records.py` に `PATCH /api/records/{id}` を追加し、更新対象フィールドのバリデーション（`rating` 範囲など）を実装。
+- `frontend/src/App.js` の記録一覧に編集UI（モーダル）と削除UI（確認ダイアログ）を追加。
+- `TASKS.md` のタスク4/10を `DONE` に更新し、次優先タスク順を更新。
+- `SPEC.md` に記録更新API仕様とフロントの編集/削除挙動を追記。
+- `agent/scrapers/eiga_scraper.py` で一覧要素 `p.sub` から監督名・公開年を抽出し、同期時の補完情報として利用するように変更。
+- `agent/tasks/movie_agent.py` で映画保存時に公開年・監督のフォールバック（一覧情報優先）を追加。
+- `frontend/src/App.js` の記録一覧に映画の公開年・監督の表示列を追加。
+- `TASKS.md` のタスク6を `DONE` に更新。
+- `backend/app/api/statistics.py` を整理し、`GET /api/statistics/overview` を統一仕様の正規エンドポイントとして一本化。
+- 互換経路 `GET /api/statistics/statistics/overview` を非推奨エイリアス化し、`Deprecation/Sunset/Link` ヘッダを追加（Sunset: 2026-05-31）。
+- 統計レスポンスに `recent_90_days` と `top_genre` を含め、既存フロントキーと統計詳細キーの両方を同一レスポンスで返却。
+- `TASKS.md` のタスク8を `DONE` に更新し、次優先順を更新。
+- `SPEC.md` / `docs/API.md` に統計API統合方針と移行日程を追記。
+- `backend/app/api/credentials.py` を追加し、`GET/PUT/DELETE /api/credentials/eiga` を実装（平文パスワード非返却）。
+- `backend/main.py` に credentials ルータを追加。
+- `agent/tasks/movie_agent.py` に資格情報利用優先順（明示入力 → 保存済み有効資格情報 → 対話）と保存ON時のみ更新する挙動を追加。
+- 復号失敗/保存済み資格情報認証失敗時に `can_fallback_to_interactive=true` を返すよう同期レスポンスを拡張。
+- `backend/app/api/search.py` に `save_credentials` / `use_saved_credentials` を追加。
+- `frontend/src/App.js` の同期モーダルに資格情報入力・保存チェック・保存済み資格情報削除UIを追加。
+- `TASKS.md` のタスク2/9を `DONE` に更新。
+- `backend/app/api/movies.py` に `POST /api/movies/{id}/refresh-details` を追加（空値更新/強制更新）。
+- `frontend/src/App.js` の記録一覧に「作品情報取得」「強制更新」ボタンを追加。
+- `backend/app/utils/cast_utils.py` を追加し、`cast` の JSON文字列保存・旧形式互換読み取りを実装。
+- `agent/tasks/movie_agent.py` の新規保存で `cast` を JSON文字列形式へ統一。
+- `scripts/migrate-cast-json.py` を追加し、既存 `str(list)` 形式からJSON文字列への移行を可能化。
+- `TASKS.md` のタスク5/11/12を `DONE` に更新。
+- `docs/SYNC_CHECKLIST.md` を追加し、同期の手動検証手順（初回/再同期/重複/失敗/復帰）を明文化。
+- `TASKS.md` のタスク7を `DONE` に更新。
+- `frontend/src/App.js` のヘッダにミニ検索入力 + 検索ボタンを追加し、既存の「映画検索」タブ結果表示/登録フローへ接続。
+- `frontend/src/App.js` の検索タブを `activeKey` 管理に変更し、ヘッダ検索実行時に検索タブへ遷移する挙動を追加。
+- `backend/tests/test_sync_workflow.py` を追加し、同期処理の重複防止・例外時rollback・失敗後再実行安全性を自動テスト化。
+- `docs/SYNC_TEST_STRATEGY.md` を追加し、外部依存モック方針とローカル再現手順を明文化。
+- `TASKS.md` のタスク3/13を `DONE` に更新（1-14 すべて完了）。
+- `agent/scrapers/eiga_scraper.py` でブラウザ起動直後の `maximize_window()` 失敗を致命扱いしないよう修正し、起動継続できるように改善。
+- `agent/scrapers/eiga_scraper.py` にスクレイパー初期化エラー詳細 (`init_error`) を保持する仕組みを追加。
+- `agent/tasks/movie_agent.py` でスクレイパー初期化失敗時に詳細エラーを同期レスポンスへ含め、原因特定しやすく改善。
+- `agent/scrapers/eiga_scraper.py` のドライバ初期化を多段フォールバック化（Chrome Selenium Manager → `CHROMEDRIVER_PATH` → webdriver_manager → Edge）。
+- `agent/scrapers/eiga_scraper.py` で `CHROME_BINARY_PATH` / `CHROMEDRIVER_PATH` の環境変数指定をサポート。
+- WSL環境でドライバ初期化に失敗した際、`environment_hint` を返して実行環境要因を判別しやすく改善。
+- ルート `package.json` の `npm run backend/frontend/test` 系を Bash スクリプト呼び出しへ変更し、WSL で `powershell: not found` にならないよう修正。
+- PowerShell 利用者向けに `*:ps` スクリプトを追加して Windows ターミナル運用も継続可能にした。
+- `scripts/dev-backend.sh` を `python3` 優先実行に変更し、`python` コマンド未設定環境でも起動できるよう修正。
+- `scripts/dev-backend.sh` / `scripts/test-backend.sh` を `backend/.venv` 自動利用に変更し、PEP 668（externally managed environment）環境でも起動・テストできるよう修正。
+- `agent/tasks/movie_agent.py` の import を実行環境別にフォールバック化し、`app.*` と `backend.app.*` の二重ロードによる SQLAlchemy テーブル重複定義エラーを修正。
+- `agent/tasks/movie_agent.py` で同期時のスクレイパー起動を認証ソース連動に変更（対話ログインのみ表示ブラウザ、資格情報ログイン時は headless）。
+- `agent/scrapers/eiga_scraper.py` の Chrome 起動オプションを補強（`--headless=new`、`--remote-allow-origins=*` など）し、WSL 環境での起動安定性を改善。
+- `agent/scrapers/eiga_scraper.py` の自動ログイン要素探索を強化（複数セレクタ + iframe 横断）し、映画.com ログインDOM変更で `name=email` が見つからないケースに対応。
+- `agent/scrapers/eiga_scraper.py` に認可ログインURL (`id.eiga.com/authorize`) へのフォールバックと全ウィンドウ横断探索を追加し、ログインフォームが別ウィンドウ/別遷移にあるケースに対応。
+- `agent/scrapers/eiga_scraper.py` の自動ログイン待機中に `/authorize/done` 停止を検出した場合、`_navigate_to_user_movie_page()` を実行して user URL 到達を成功判定するよう修正。
+- `agent/scrapers/eiga_scraper.py` にページ内リンクからの `user_id` 抽出を追加し、`/user/{id}/...` URL に遷移しないケースを補完。
+- `agent/scrapers/eiga_scraper.py` の視聴履歴取得を改善し、`user_id` 未取得時でも `/user/watched/` 起点で取得を継続できるよう修正。
+- `agent/scrapers/eiga_scraper.py` を再調整し、`/user/watched/` フォールバックを廃止。`トップページ -> .user-account` からマイページへ遷移して `user_id` を確定する方針へ変更。
+- 自動ログイン成功判定を厳格化し、`user_id` が未取得の場合は待機継続して遷移補完を試すよう修正。
+- `agent/scrapers/eiga_scraper.py` の user 識別子抽出を数値限定から `slug` 対応へ拡張（`/user/{key}/` 形式）。
+- `agent/scrapers/eiga_scraper.py` に映画要素抽出のリンクベースフォールバックを追加し、`list-my-data` が存在しないDOMでも `/movie/{id}/` から同期可能に改善。
+- `agent/scrapers/eiga_scraper.py` の視聴履歴取得に `per=all` 再取得フォールバックを追加し、`list-my-data` が初回0件になるケースを改善。
+- ページ送り判定を `a.next` に加えて `rel=next` でも検出するよう強化。
+- `agent/scrapers/eiga_scraper.py` に簡易ステルス設定（`navigator.webdriver` 抑止など）を追加し、headless 実行時の要素未描画リスクを低減。
+- `agent/scrapers/eiga_scraper.py` に映画一覧復旧導線（Myページ内リンクから `/user/.../movie/?sort=new&filter=watched&per=all` へ再遷移）を追加。
+- `agent/tasks/movie_agent.py` で Windows 実行時は explicit/saved 認証でも headed 起動を優先し、headless描画差分の影響を回避。
+- `agent/scrapers/eiga_scraper.py` に映画一覧DOM待機 (`_wait_for_movie_list_dom`) を追加し、フィルター切替直後の未描画状態で0件判定される問題を緩和。
+- `agent/scrapers/eiga_scraper.py` の `user_id` 抽出を改善し、`return_to` や Myページ文脈を優先して誤ユーザーIDを拾いにくく修正。
+- `agent/scrapers/eiga_scraper.py` のマイページ遷移を `/mypage/` 直遷移優先に変更し、ランダムな `/user/...` リンク誤爆を抑制。
+- `agent/scrapers/eiga_scraper.py` に `/mypage/` 起点の `user_id` 再確定処理を追加し、視聴履歴取得前に毎回 user_id を上書き確定するよう修正。
+- `user_id` の到達済み判定を「確定済みIDのみ有効」に変更し、誤ID保持時の早期リターンを防止。
+- `/authorize/done` の遷移処理を強化し、`/login/oauth/gid/` コールバックURLへの直接遷移を優先して `eiga.com` 側セッション確立を安定化。
+- `is_logged_in()` にログインURL判定を追加し、フォーム未検出時の誤ログイン判定を抑制。
+- `/authorize/done` 後の処理を再設計し、`/login/oauth/gid/` 候補URLを複数回試行しつつ都度 `/mypage/` でログイン成立確認するフローへ変更。
+- `univLink` はコールバック候補で確定できなかった場合の再試行トリガとして使用するよう整理。
+- `agent/scrapers/eiga_scraper.py` に未ログインヘッダー（`head-account log-out` + `ログイン`）判定を追加し、未ログイン状態を明示的に検出するよう修正。
+- 自動ログインで未ログインUIが継続する場合、OAuthログインフローを1回だけ再試行するリカバリを追加。
+- 未ログイン時は `user_id` 抽出をスキップし、他ユーザーIDの誤取得を抑制。
+- OAuthコールバックURL選択を `code+state` 必須優先へ変更し、`code` 単独URLによる「ログイン失敗」アラート発生を抑制。
+- OAuth遷移中の `unexpected alert open` を捕捉してアラートを受理し、次候補へ継続できるよう改善。
+- `/authorize/done` 後のOAuth確定を調整し、`state` なし候補URLの直叩きをスキップするよう変更。
+- コールバック失敗アラート後は `/authorize/done` へ戻して、`univLink` / `映画.comへ戻る` リンククリック導線を再試行するよう改善。
+- `authorize/done` 後の「映画.comへ戻る」リンク選択で `state` 付きURLを優先するよう修正。
+- Seleniumの `no such window` 対策として、生存ウィンドウへの自動切替とアラート自動受理を追加し、セッション切断誤判定を抑制。
+- OAuth認可URL（`/authorize?...state=...`）から `state` を保持し、`code` のみコールバックURLに `state` を補完して再試行できるよう改善。
+- `/mypage/` 確定処理の前後でアラート受理を行い、`unexpected alert open` による中断を低減。
+- `/authorize/done` で `row.link_btn a.univLink` を優先クリックするフローに変更し、URL直遷移依存を低減。
+- 戻るリンククリック後は即時 `/mypage/` 遷移せず、OAuthリダイレクト完了待機後にログイン判定するよう調整。
+- `agent/tasks/movie_agent.py` の自動対話ログインフォールバックを撤回し、ログイン失敗時は一貫して失敗レスポンスを返す設計へ戻した。
+- `univLink` 再試行クリックを強化し、通常クリック失敗時に JS click へフォールバックするよう修正。
+- 自動ログイン時は初期段階で `AUTH_LOGIN_URL` へ直接遷移し、ログインフォーム表示までの待機を短縮。
+
 ## 2026-02-25
 
 - `AGENT_SETTINGS.md` を追加し、運用ルール（最小差分修正、タスク表記ゆれ解釈、履歴記録、仕様更新同期、再開プロンプト）を定義。
@@ -15,3 +122,6 @@
 - 同期中にログインブラウザを閉じた場合の「同期キャンセル」要件を `SPEC.md` と `TASKS.md` に追加。
 - `TASKS.md` を全面改訂し、各タスクに目的・実装仕様・DoD・失敗時挙動・優先順を定義。
 - 実装後に判明しやすいリスクを `SPEC.md` に追記。
+- `agent/tasks/movie_agent.py` の `app.*` import を `backend.app.*` に修正し、IDE の解決警告を低減。
+- `backend/__init__.py` を追加し、`backend` をパッケージとして明示。
+- `.gitignore` に Python キャッシュ除外（`__pycache__/`, `*.py[cod]`）を追加。

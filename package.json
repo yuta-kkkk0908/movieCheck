@@ -4,13 +4,19 @@
   "version": "1.0.0",
   "description": "Developer command shortcuts for movie-app",
   "scripts": {
-    "backend": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/dev-backend.ps1",
-    "frontend": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/dev-frontend.ps1",
+    "backend": "bash ./scripts/dev-backend.sh",
+    "frontend": "bash ./scripts/dev-frontend.sh",
     "dev": "concurrently -k -n backend,frontend -c cyan,green \"npm run backend\" \"npm run frontend\"",
-    "dev:split": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/dev-split.ps1",
-    "test:backend": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/test-backend.ps1",
-    "test:frontend": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/test-frontend.ps1",
-    "test": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/test-all.ps1"
+    "dev:split": "bash -lc './scripts/dev-backend.sh & ./scripts/dev-frontend.sh & wait'",
+    "test:backend": "bash ./scripts/test-backend.sh",
+    "test:frontend": "bash ./scripts/test-frontend.sh",
+    "test": "bash ./scripts/test-all.sh",
+    "backend:ps": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/dev-backend.ps1",
+    "frontend:ps": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/dev-frontend.ps1",
+    "dev:split:ps": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/dev-split.ps1",
+    "test:backend:ps": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/test-backend.ps1",
+    "test:frontend:ps": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/test-frontend.ps1",
+    "test:ps": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/test-all.ps1"
   },
   "devDependencies": {
     "concurrently": "^9.0.1"

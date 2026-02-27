@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.models.models import Record, Movie, ViewingMethod, Mood
-from pydantic import BaseModel
+from pydantic import BaseModel, root_validator, validator
 from typing import List, Optional
 from datetime import datetime
 
@@ -18,6 +18,31 @@ class RecordCreate(BaseModel):
     rating: Optional[float] = None
     mood: Optional[Mood] = None
     comment: Optional[str] = None
+
+    @validator("rating")
+    def validate_rating(cls, value):
+        if value is not None and not (0.0 <= value <= 5.0):
+            raise ValueError("rating must be between 0.0 and 5.0")
+        return value
+
+class RecordUpdate(BaseModel):
+    viewed_date: Optional[datetime] = None
+    viewing_method: Optional[ViewingMethod] = None
+    rating: Optional[float] = None
+    mood: Optional[Mood] = None
+    comment: Optional[str] = None
+
+    @validator("rating")
+    def validate_rating(cls, value):
+        if value is not None and not (0.0 <= value <= 5.0):
+            raise ValueError("rating must be between 0.0 and 5.0")
+        return value
+
+    @root_validator(pre=True)
+    def validate_any_field_present(cls, values):
+        if not values:
+            raise ValueError("at least one field must be provided")
+        return values
 
 class RecordResponse(BaseModel):
     id: int
@@ -68,3 +93,18 @@ async def delete_record(record_id: int, db: Session = Depends(get_db)):
     db.delete(record)
     db.commit()
     return {"message": "削除しました"}
+
+@router.patch("/{record_id}", response_model=RecordResponse)
+async def update_record(record_id: int, payload: RecordUpdate, db: Session = Depends(get_db)):
+    """記録更新"""
+    record = db.query(Record).filter(Record.id == record_id).first()
+    if not record:
+        raise HTTPException(status_code=404, detail="記録が見つかりません")
+
+    updates = payload.dict(exclude_unset=True)
+    for key, value in updates.items():
+        setattr(record, key, value)
+
+    db.commit()
+    db.refresh(record)
+    return record
