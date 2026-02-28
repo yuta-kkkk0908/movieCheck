@@ -1,5 +1,5 @@
 $ErrorActionPreference = 'Stop'
-$root = Resolve-Path (Join-Path $PSScriptRoot '..')
+$root = if ($env:PROJECT_ROOT) { $env:PROJECT_ROOT } else { (Resolve-Path (Join-Path $PSScriptRoot '..')) }
 
 Start-Process powershell -WorkingDirectory $root -ArgumentList '-NoExit','-Command','npm run backend'
 Start-Process powershell -WorkingDirectory $root -ArgumentList '-NoExit','-Command','npm run frontend'

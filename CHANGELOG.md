@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-02-28
+
+- `frontend/src/App.js` の記録一覧に一括操作UIを追加（全選択/個別選択/選択解除/選択件数表示/選択削除）。
+- `frontend/src/App.js` の削除処理を共通化し、複数選択時は `DELETE /api/records/{id}` を逐次実行して部分成功・失敗件数を表示するよう変更。
+- 記録再読込時に存在しないIDを選択状態から自動除外する同期処理を追加。
+- `TASKS.md` のタスク15を `DONE` に更新し、次優先タスクを16以降へ繰り上げ。
+- `AGENT.md` を更新し、運用ルール（ビルドはユーザー実行・修正ごとの型チェック・変更履歴記録・仕様/タスクの記載先）を明記。
+- 記録一覧の選択UIをネイティブチェックボックスへ変更し、環境依存の表示不具合があっても一括選択・選択削除を確実に操作できるよう修正。
+- 記録一覧のチェックボックスサイズを拡大し、クリックしやすさを改善。
+- 記録一覧にカラムフィルタ（タイトル/公開年/監督/視聴方法/気分）とフィルタ解除、表示件数を追加。
+- フィルタ結果に対して全選択・選択解除が動作するよう選択ロジックを調整し、0件時メッセージ表示を追加。
+- ルート `package.json` の `npm run dev` をフロント単体起動（ビルドなし）へ変更し、従来のバックエンド+フロント同時起動を `npm run dev:full` として分離。
+- 記録一覧のカラムフィルタUIをテーブル上部からヘッダー内（2段目）へ移設し、列ごとの絞り込み操作を一覧ヘッダー上で完結できるよう改善。
+- `scripts/test-frontend.sh` を改善し、`TMPDIR=/tmp` の自動設定・`CI=1`・`--passWithNoTests` デフォルトで実行しやすくした。
+- `scripts/test-backend.sh` を改善し、`pytest` 引数をそのまま渡せるようにした（未指定時は `-q`）。
+- `scripts/test-all.sh` を改善し、`all/backend/frontend` の対象指定と使用方法表示を追加。
+- PowerShell 版の `scripts/test-frontend.ps1` / `scripts/test-backend.ps1` / `scripts/test-all.ps1` も同等の引数対応へ揃えた。
+- `scripts/dev-frontend.sh` / `scripts/dev-frontend.ps1` に `DISABLE_ESLINT_PLUGIN=true` を追加し、フロント開発起動の初回コンパイル負荷を軽減。
+- `frontend/src/App.js` の `antd Checkbox` import 漏れを修正し、同期モーダル表示時の実行時エラー（白画面化）を解消。
+- 記録一覧を `antd Table` ベースへ刷新し、テーブル本文の縦スクロール表示を追加（`scroll.y`）。
+- 記録一覧の各カラムにソート/フィルタアイコンを追加し、タイトル・監督は検索アイコン付きの列フィルタを実装。
+- 記録一覧に全件数/表示件数/選択件数を表示し、一覧内クイック検索と「検索結果を全選択」操作を追加。
+- `scripts/*.sh` と `scripts/*.ps1` の主要実行スクリプトを `PROJECT_ROOT` 対応に変更し、プロジェクト移動後もパス再編集なしで実行できるよう改善。
+- `scripts/dev-frontend.sh` / `scripts/test-frontend.sh` と PowerShell 版に、`react-scripts` 未検出時の `npm install` 自動実行を追加し、移動直後の `react-scripts: not found` を自己復旧可能にした。
+
 ## 2026-02-27
 
 - `backend/app/models/models.py` の `movies` テーブルに `release_date`（DateTime）カラムを追加。

@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
-cd "$(dirname "$0")/.."
-cd backend
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="${PROJECT_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
+cd "$PROJECT_ROOT/backend"
 
 if command -v python3 >/dev/null 2>&1; then
   BASE_PYTHON="python3"
