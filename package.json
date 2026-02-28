@@ -6,7 +6,8 @@
   "scripts": {
     "backend": "bash ./scripts/dev-backend.sh",
     "frontend": "bash ./scripts/dev-frontend.sh",
-    "dev": "concurrently -k -n backend,frontend -c cyan,green \"npm run backend\" \"npm run frontend\"",
+    "dev": "npm run frontend",
+    "dev:full": "concurrently -k -n backend,frontend -c cyan,green \"npm run backend\" \"npm run frontend\"",
     "dev:split": "bash -lc './scripts/dev-backend.sh & ./scripts/dev-frontend.sh & wait'",
     "test:backend": "bash ./scripts/test-backend.sh",
     "test:frontend": "bash ./scripts/test-frontend.sh",

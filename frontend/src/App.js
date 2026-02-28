@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Layout, Tabs, Button, Input, Card, Rate, Tag, Modal, Form, Select, DatePicker, message, Spin, Space, Checkbox } from 'antd';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Layout, Tabs, Button, Input, Card, Rate, Tag, Modal, Form, Select, DatePicker, message, Spin, Space, Checkbox, Table } from 'antd';
 import { SearchOutlined, PlusOutlined, SyncOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import dayjs from 'dayjs';
@@ -9,10 +9,29 @@ const { Header, Content, Footer, Sider } = Layout;
 import Dashboard from './components/Dashboard';
 
 const API_BASE = 'http://localhost:8001/api';
+const VIEWING_METHOD_LABELS = {
+  theater: '映画館',
+  streaming: 'ストリーミング',
+  tv: 'TV放送',
+  dvd: 'DVD/Blu-ray',
+  other: 'その他'
+};
+const MOOD_LABELS = {
+  happy: '楽しい',
+  sad: '悲しい',
+  excited: '興奮',
+  relaxed: 'リラックス',
+  thoughtful: '考察的',
+  scary: '怖い',
+  romantic: 'ロマンティック'
+};
 
 function App() {
   const [movies, setMovies] = useState([]);
   const [records, setRecords] = useState([]);
+  const [selectedRecordIds, setSelectedRecordIds] = useState([]);
+  const [recordQuickSearch, setRecordQuickSearch] = useState('');
+  const [displayedRecordCount, setDisplayedRecordCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [headerSearchQuery, setHeaderSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
@@ -32,6 +51,40 @@ function App() {
   const [recordEditForm] = Form.useForm();
   const [syncForm] = Form.useForm();
 
+  const movieMap = useMemo(() => {
+    return new Map(movies.map((movie) => [movie.id, movie]));
+  }, [movies]);
+
+  const searchableRecords = useMemo(() => {
+    const keyword = recordQuickSearch.trim().toLowerCase();
+    return records
+      .map((record) => {
+        const movie = movieMap.get(record.movie_id);
+        return {
+          ...record,
+          movie_title: movie?.title || '不明',
+          released_year: movie?.released_year ?? null,
+          director: movie?.director || '',
+          viewing_method_label: VIEWING_METHOD_LABELS[record.viewing_method] || record.viewing_method || '-',
+          mood_label: MOOD_LABELS[record.mood] || record.mood || '-'
+        };
+      })
+      .filter((record) => {
+        if (!keyword) return true;
+        const text = [
+          record.movie_title,
+          String(record.released_year ?? ''),
+          record.director,
+          record.viewing_method_label,
+          record.mood_label,
+          record.comment || ''
+        ]
+          .join(' ')
+          .toLowerCase();
+        return text.includes(keyword);
+      });
+  }, [records, movieMap, recordQuickSearch]);
+
   // 初期データ読み込み
   useEffect(() => {
     loadMovies();
@@ -44,6 +97,15 @@ function App() {
       loadSavedCredential();
     }
   }, [isSyncModalVisible]);
+
+  useEffect(() => {
+    // レコード再読込後に存在しないIDが残らないよう選択状態を同期する
+    setSelectedRecordIds((prevIds) => prevIds.filter((id) => records.some((record) => record.id === id)));
+  }, [records]);
+
+  useEffect(() => {
+    setDisplayedRecordCount(searchableRecords.length);
+  }, [searchableRecords]);
 
   const loadMovies = async () => {
     try {
@@ -220,13 +282,105 @@ function App() {
       okType: 'danger',
       cancelText: 'キャンセル',
       onOk: async () => {
-        try {
-          await axios.delete(`${API_BASE}/records/${recordId}`);
+        const { successIds, failedIds } = await deleteRecordsByIds([recordId]);
+        if (successIds.length > 0) {
           message.success('記録を削除しました');
-          loadRecords();
-        } catch (error) {
-          console.error('記録削除エラー:', error);
+          setSelectedRecordIds((prevIds) => prevIds.filter((id) => id !== recordId));
+          await loadRecords();
+        }
+        if (failedIds.length > 0) {
           message.error('記録の削除に失敗しました');
+        }
+      }
+    });
+  };
+
+  const handleSelectAllSearchResults = () => {
+    setSelectedRecordIds(searchableRecords.map((record) => record.id));
+  };
+
+  const handleRecordTableChange = (_pagination, _filters, _sorter, extra) => {
+    setDisplayedRecordCount(extra?.currentDataSource?.length ?? searchableRecords.length);
+  };
+
+  const getRecordTextFilterProps = (dataIndex) => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+      <div style={{ padding: 8, width: 220 }} onKeyDown={(e) => e.stopPropagation()}>
+        <Input
+          placeholder="キーワード"
+          value={selectedKeys[0]}
+          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onPressEnter={() => confirm()}
+          allowClear
+          size="small"
+          style={{ marginBottom: 8 }}
+        />
+        <Space>
+          <Button type="primary" size="small" onClick={() => confirm()} icon={<SearchOutlined />}>
+            検索
+          </Button>
+          <Button
+            size="small"
+            onClick={() => {
+              clearFilters?.();
+              confirm({ closeDropdown: false });
+            }}
+          >
+            リセット
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered) => <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />,
+    onFilter: (value, record) =>
+      String(record[dataIndex] ?? '').toLowerCase().includes(String(value).toLowerCase())
+  });
+
+  const deleteRecordsByIds = async (recordIds) => {
+    const uniqueIds = [...new Set(recordIds)];
+    const results = await Promise.allSettled(
+      uniqueIds.map((recordId) => axios.delete(`${API_BASE}/records/${recordId}`))
+    );
+
+    const successIds = [];
+    const failedIds = [];
+    results.forEach((result, index) => {
+      const targetId = uniqueIds[index];
+      if (result.status === 'fulfilled') {
+        successIds.push(targetId);
+      } else {
+        failedIds.push(targetId);
+        console.error(`記録削除エラー(${targetId}):`, result.reason);
+      }
+    });
+
+    return { successIds, failedIds };
+  };
+
+  const handleDeleteSelectedRecords = () => {
+    if (selectedRecordIds.length === 0) {
+      message.info('削除する記録を選択してください');
+      return;
+    }
+
+    Modal.confirm({
+      title: `選択した${selectedRecordIds.length}件の記録を削除しますか？`,
+      icon: <ExclamationCircleOutlined />,
+      content: 'この操作は元に戻せません。',
+      okText: '削除',
+      okType: 'danger',
+      cancelText: 'キャンセル',
+      onOk: async () => {
+        const targetIds = [...selectedRecordIds];
+        const { successIds, failedIds } = await deleteRecordsByIds(targetIds);
+
+        if (successIds.length > 0) {
+          message.success(`${successIds.length}件の記録を削除しました`);
+          setSelectedRecordIds((prevIds) => prevIds.filter((id) => !successIds.includes(id)));
+          await loadRecords();
+        }
+        if (failedIds.length > 0) {
+          message.error(`${failedIds.length}件の削除に失敗しました`);
         }
       }
     });
@@ -328,6 +482,109 @@ function App() {
         }
       }
     });
+  };
+
+  const selectedRecordCount = selectedRecordIds.length;
+  const viewingMethodFilterOptions = useMemo(() => {
+    const values = [...new Set(records.map((record) => record.viewing_method).filter(Boolean))];
+    return values.map((value) => ({ text: VIEWING_METHOD_LABELS[value] || value, value }));
+  }, [records]);
+  const moodFilterOptions = useMemo(() => {
+    const values = [...new Set(records.map((record) => record.mood).filter(Boolean))];
+    return values.map((value) => ({ text: MOOD_LABELS[value] || value, value }));
+  }, [records]);
+
+  const recordColumns = [
+    {
+      title: '映画タイトル',
+      dataIndex: 'movie_title',
+      key: 'movie_title',
+      width: 240,
+      sorter: (a, b) => a.movie_title.localeCompare(b.movie_title, 'ja'),
+      ...getRecordTextFilterProps('movie_title')
+    },
+    {
+      title: '公開年',
+      dataIndex: 'released_year',
+      key: 'released_year',
+      width: 110,
+      sorter: (a, b) => (a.released_year ?? 0) - (b.released_year ?? 0),
+      render: (value) => value ?? '-'
+    },
+    {
+      title: '監督',
+      dataIndex: 'director',
+      key: 'director',
+      width: 180,
+      sorter: (a, b) => a.director.localeCompare(b.director, 'ja'),
+      render: (value) => value || '-',
+      ...getRecordTextFilterProps('director')
+    },
+    {
+      title: '視聴日',
+      dataIndex: 'viewed_date',
+      key: 'viewed_date',
+      width: 130,
+      defaultSortOrder: 'descend',
+      sorter: (a, b) => new Date(a.viewed_date).getTime() - new Date(b.viewed_date).getTime(),
+      render: (value) => new Date(value).toLocaleDateString('ja-JP')
+    },
+    {
+      title: '視聴方法',
+      dataIndex: 'viewing_method',
+      key: 'viewing_method',
+      width: 150,
+      filters: viewingMethodFilterOptions,
+      onFilter: (value, record) => record.viewing_method === value,
+      sorter: (a, b) => a.viewing_method_label.localeCompare(b.viewing_method_label, 'ja'),
+      render: (_value, record) => <Tag color="blue">{record.viewing_method_label}</Tag>
+    },
+    {
+      title: '評価',
+      dataIndex: 'rating',
+      key: 'rating',
+      width: 160,
+      sorter: (a, b) => (a.rating ?? -1) - (b.rating ?? -1),
+      render: (value) => (value !== null && value !== undefined ? <Rate allowHalf disabled value={value} /> : '-')
+    },
+    {
+      title: '気分',
+      dataIndex: 'mood',
+      key: 'mood',
+      width: 140,
+      filters: moodFilterOptions,
+      onFilter: (value, record) => record.mood === value,
+      sorter: (a, b) => a.mood_label.localeCompare(b.mood_label, 'ja'),
+      render: (_value, record) => (record.mood ? <Tag>{record.mood_label}</Tag> : '-')
+    },
+    {
+      title: '操作',
+      key: 'actions',
+      width: 310,
+      render: (_value, record) => (
+        <Space>
+          <Button size="small" onClick={() => handleRefreshMovieDetails(record.movie_id, false)}>
+            作品情報取得
+          </Button>
+          <Button size="small" onClick={() => handleRefreshMovieDetails(record.movie_id, true)}>
+            強制更新
+          </Button>
+          <Button size="small" icon={<EditOutlined />} onClick={() => openEditRecordModal(record)}>
+            編集
+          </Button>
+          <Button danger size="small" icon={<DeleteOutlined />} onClick={() => handleDeleteRecord(record.id)}>
+            削除
+          </Button>
+        </Space>
+      )
+    }
+  ];
+
+  const rowSelection = {
+    selectedRowKeys: selectedRecordIds,
+    onChange: (selectedRowKeys) => setSelectedRecordIds(selectedRowKeys),
+    preserveSelectedRowKeys: true,
+    columnWidth: 56
   };
 
   return (
@@ -441,73 +698,48 @@ function App() {
                     <Button type="primary" icon={<PlusOutlined />} style={{ marginBottom: '20px' }}>
                       新規記録
                     </Button>
-                    <div style={{ overflowX: 'auto' }}>
-                      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead>
-                          <tr style={{ borderBottom: '2px solid #ddd' }}>
-                            <th style={{ padding: '10px', textAlign: 'left' }}>映画タイトル</th>
-                            <th style={{ padding: '10px', textAlign: 'left' }}>公開年</th>
-                            <th style={{ padding: '10px', textAlign: 'left' }}>監督</th>
-                            <th style={{ padding: '10px', textAlign: 'left' }}>視聴日</th>
-                            <th style={{ padding: '10px', textAlign: 'left' }}>視聴方法</th>
-                            <th style={{ padding: '10px', textAlign: 'left' }}>評価</th>
-                            <th style={{ padding: '10px', textAlign: 'left' }}>気分</th>
-                            <th style={{ padding: '10px', textAlign: 'left' }}>操作</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {records.map(record => {
-                            const movie = movies.find(m => m.id === record.movie_id);
-                            return (
-                              <tr key={record.id} style={{ borderBottom: '1px solid #ddd' }}>
-                                <td style={{ padding: '10px' }}>{movie?.title || '不明'}</td>
-                                <td style={{ padding: '10px' }}>{movie?.released_year ?? '-'}</td>
-                                <td style={{ padding: '10px' }}>{movie?.director || '-'}</td>
-                                <td style={{ padding: '10px' }}>{new Date(record.viewed_date).toLocaleDateString('ja-JP')}</td>
-                                <td style={{ padding: '10px' }}>{record.viewing_method}</td>
-                                <td style={{ padding: '10px' }}>
-                                  {record.rating !== null && record.rating !== undefined && <Rate allowHalf disabled value={record.rating} />}
-                                </td>
-                                <td style={{ padding: '10px' }}>
-                                  {record.mood && <Tag>{record.mood}</Tag>}
-                                </td>
-                                <td style={{ padding: '10px' }}>
-                                  <Space>
-                                    <Button
-                                      size="small"
-                                      onClick={() => handleRefreshMovieDetails(record.movie_id, false)}
-                                    >
-                                      作品情報取得
-                                    </Button>
-                                    <Button
-                                      size="small"
-                                      onClick={() => handleRefreshMovieDetails(record.movie_id, true)}
-                                    >
-                                      強制更新
-                                    </Button>
-                                    <Button
-                                      size="small"
-                                      icon={<EditOutlined />}
-                                      onClick={() => openEditRecordModal(record)}
-                                    >
-                                      編集
-                                    </Button>
-                                    <Button
-                                      danger
-                                      size="small"
-                                      icon={<DeleteOutlined />}
-                                      onClick={() => handleDeleteRecord(record.id)}
-                                    >
-                                      削除
-                                    </Button>
-                                  </Space>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
+                    <div style={{ marginBottom: '12px' }}>
+                      <Space wrap>
+                        <Input
+                          allowClear
+                          prefix={<SearchOutlined />}
+                          placeholder="一覧内検索（タイトル・監督・コメント・視聴方法・気分）"
+                          value={recordQuickSearch}
+                          onChange={(e) => setRecordQuickSearch(e.target.value)}
+                          style={{ width: 420 }}
+                        />
+                        <Button onClick={handleSelectAllSearchResults} disabled={searchableRecords.length === 0}>
+                          検索結果を全選択
+                        </Button>
+                        <span>選択中: {selectedRecordCount}件</span>
+                        <span>表示中: {displayedRecordCount}件 / 全件: {records.length}件</span>
+                        <Button
+                          onClick={() => setSelectedRecordIds([])}
+                          disabled={selectedRecordCount === 0}
+                        >
+                          選択解除
+                        </Button>
+                        <Button
+                          danger
+                          icon={<DeleteOutlined />}
+                          onClick={handleDeleteSelectedRecords}
+                          disabled={selectedRecordCount === 0}
+                        >
+                          選択削除
+                        </Button>
+                      </Space>
                     </div>
+                    <Table
+                      rowKey="id"
+                      columns={recordColumns}
+                      dataSource={searchableRecords}
+                      rowSelection={rowSelection}
+                      onChange={handleRecordTableChange}
+                      pagination={false}
+                      scroll={{ x: 1600, y: 540 }}
+                      locale={{ emptyText: '条件に一致する記録がありません' }}
+                      size="middle"
+                    />
                   </div>
                 )
               }
